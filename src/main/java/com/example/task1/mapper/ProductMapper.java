@@ -3,7 +3,8 @@ package com.example.task1.mapper;
 import com.example.task1.model.Product;
 import com.example.task1.model.ProductType;
 import org.modelmapper.ModelMapper;
-import org.openapitools.model.ProductDTO;
+import org.openapitools.model.ProductReadDTO;
+import org.openapitools.model.ProductWriteDTO;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,25 +15,27 @@ public class ProductMapper {
         this.modelMapper = modelMapper;
     }
 
-    public Product toEntity(ProductDTO generatedProduct) {
+    public Product toEntity(ProductWriteDTO generatedProduct) {
         return generatedProduct != null ? modelMapper.map(generatedProduct, Product.class) : null;
     }
 
-    public ProductDTO toDTO(Product product) {
-        ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-        productDTO.setProductTypeDTO(ProductDTO.ProductTypeDTOEnum.valueOf(product.getProductType().name()));
-        return productDTO;
+    public ProductReadDTO toReadDTO(Product product) {
+        ProductReadDTO productReadDTO = modelMapper.map(product, ProductReadDTO.class);
+        productReadDTO.setProductTypeDTO(ProductReadDTO.ProductTypeDTOEnum.valueOf(product.getProductType().name()));
+        return productReadDTO;
     }
 
+    public ProductWriteDTO toWriteDTO(Product product) {
+        return modelMapper.map(product, ProductWriteDTO.class);
+    }
 
-    public ProductType toProductType(ProductDTO.ProductTypeDTOEnum productTypeDTO) {
+    public ProductType toProductType(ProductReadDTO.ProductTypeDTOEnum productTypeDTO) {
         return modelMapper.map(productTypeDTO, ProductType.class);
     }
 
-    public ProductDTO.ProductTypeDTOEnum toProductTypeDTO(ProductType productType) {
-        return ProductDTO.ProductTypeDTOEnum.valueOf(productType.name());
+    public ProductReadDTO.ProductTypeDTOEnum toProductTypeDTO(ProductType productType) {
+        return ProductReadDTO.ProductTypeDTOEnum.valueOf(productType.name());
     }
-
 }
 
 

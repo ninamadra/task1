@@ -1,15 +1,15 @@
 package com.example.task1.service;
 
-import org.openapitools.model.ProductDTO;
+import org.openapitools.model.ProductReadDTO;
+import org.openapitools.model.ProductWriteDTO;
+import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface ProductService {
-    ProductDTO createProduct(String name, LocalDate expirationDate, ProductDTO.ProductTypeDTOEnum productTypeDTO);
-    Optional<ProductDTO> getProductById(Long id);
-    List<ProductDTO> getAllProducts();
-    boolean updateProduct(Long id, String name, LocalDate expirationDate, ProductDTO.ProductTypeDTOEnum productTypeDTO);
-    boolean deleteProduct(Long id);
+    ResponseEntity<ProductReadDTO> createProduct(ProductWriteDTO productWriteDTO);
+    ResponseEntity<ProductReadDTO> getProductById(Long id);
+    ResponseEntity<List<ProductReadDTO>> getAllProducts();
+    ResponseEntity<Void> deleteProductById(Long id);
+    ResponseEntity<ProductReadDTO> updateProduct(Long id, ProductWriteDTO productWriteDTO);
 }
