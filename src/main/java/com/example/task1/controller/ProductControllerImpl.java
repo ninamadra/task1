@@ -16,6 +16,7 @@ public class ProductControllerImpl implements ProductsApi {
 
     private final ProductService productService;
 
+    //w nowym spring adnotacja @Autowired nie jest już konieczna
     @Autowired
     public ProductControllerImpl(ProductService productService) {
         this.productService = productService;
@@ -23,6 +24,7 @@ public class ProductControllerImpl implements ProductsApi {
 
     @Override
     public ResponseEntity<ProductDTO> createProduct(ProductDTO productDTO) {
+        //TODO ja bym przekazywał cały obiekt ProductDTO do serwisu i tam wyciągał wartości
         ProductDTO response = productService.createProduct(
                 productDTO.getName(),
                 productDTO.getExpirationDate(),

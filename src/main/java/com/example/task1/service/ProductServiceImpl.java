@@ -34,9 +34,11 @@ public class ProductServiceImpl implements ProductService {
                 .expirationDate(expirationDate)
                 .productType((productMapper.toProductType(productTypeDTO)))
                 .build();
+        //TODO mozna nadpisac metode toString w klasie Product
         logger.info(created.getId() + " " + created.getName() + " " +  created.getExpirationDate() + " " + created.getProductType());
-        Product savedProduct = productRepository.save(created);
 
+        //TODO nie ma potrzeby tworzenia obiektu. Mozna od razu dodac do metody toDTO
+        Product savedProduct = productRepository.save(created);
         return productMapper.toDTO(savedProduct);
 
     }
@@ -51,6 +53,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
                 .map(productMapper::toDTO)
+                //TODO uzyj .toList zamiast collect
                 .collect(Collectors.toList());
     }
 
@@ -80,6 +83,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public boolean deleteProduct(Long id) {
         Optional<Product> productOptional = productRepository.findById(id);
+        //TODO od razu zwracamy. Nie robimy zbędnych obiektów
         boolean isFound = productOptional.isPresent();
         productOptional.ifPresent(productRepository::delete);
         return isFound;
