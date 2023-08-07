@@ -26,4 +26,6 @@ public class Product {
 
     private ProductType productType;
 
+    private Integer quantity = null;
+
 }

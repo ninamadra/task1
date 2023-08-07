@@ -12,4 +12,6 @@ public interface ProductService {
     ResponseEntity<List<ProductReadDTO>> getAllProducts();
     ResponseEntity<Void> deleteProductById(Long id);
     ResponseEntity<ProductReadDTO> updateProduct(Long id, ProductWriteDTO productWriteDTO);
+
+    void updateProductQuantity(Long productId, Integer quantity);
 }

@@ -1,11 +1,11 @@
 package com.example.task1.service;
 
+import com.example.task1.ProductKafkaProducer;
 import com.example.task1.mapper.ProductMapper;
 import com.example.task1.model.Product;
 import com.example.task1.repository.ProductRepository;
 import org.openapitools.model.ProductReadDTO;
 import org.openapitools.model.ProductWriteDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +16,20 @@ import java.util.Optional;
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final ProductKafkaProducer kafkaProducer;
     private final ProductMapper productMapper;
 
-
-    @Autowired
-    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper, ProductKafkaProducer kafkaProducer) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
+        this.kafkaProducer = kafkaProducer;
     }
 
     @Override
     public ResponseEntity<ProductReadDTO> createProduct(ProductWriteDTO productWriteDTO) {
         Product product = productMapper.toEntity(productWriteDTO);
         productRepository.save(product);
+        kafkaProducer.sendProductMessage(product.getId());
         return ResponseEntity.created(URI.create("/" + product.getId())).body(productMapper.toReadDTO(product));
     }
 
@@ -68,6 +69,15 @@ public class ProductServiceImpl implements ProductService {
             return ResponseEntity.ok(productMapper.toReadDTO(updatedProduct));
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @Override
+    public void updateProductQuantity(Long productId, Integer quantity) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        productOptional.ifPresent(product -> {
+            product.setQuantity(quantity);
+            productRepository.save(product);
+        });
     }
 
 }

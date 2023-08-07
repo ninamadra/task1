@@ -6,7 +6,7 @@ info:
 
 components:
   schemas:
-    ProductReadDTO:    # Renamed from ProductDTO
+    ProductReadDTO:
       type: object
       properties:
         id:
@@ -20,11 +20,14 @@ components:
         productTypeDTO:
           type: string
           enum: [FRUITS, VEGETABLES, OTHER]
+        quantity:   # New property for ProductReadDTO
+          type: integer
+          nullable: true   # Quantity can be null in ProductReadDTO
       required:
         - name
         - productTypeDTO
 
-    ProductWriteDTO:   # New DTO without the id field
+    ProductWriteDTO:
       type: object
       properties:
         name:
@@ -49,14 +52,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProductWriteDTO'   # Use ProductWriteDTO for request body
+              $ref: '#/components/schemas/ProductWriteDTO'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductReadDTO'  # Use ProductReadDTO for response body
+                $ref: '#/components/schemas/ProductReadDTO'
 
     get:
       summary: Get all products
@@ -69,7 +72,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProductReadDTO'  # Use ProductReadDTO for response body
+                  $ref: '#/components/schemas/ProductReadDTO'
 
   /products/{id}:
     get:
@@ -89,7 +92,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductReadDTO'  # Use ProductReadDTO for response body
+                $ref: '#/components/schemas/ProductReadDTO'
 
     delete:
       summary: Delete a product by ID
@@ -122,11 +125,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProductWriteDTO'   # Use ProductWriteDTO for request body
+              $ref: '#/components/schemas/ProductWriteDTO'
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductReadDTO'  # Use ProductReadDTO for response body
+                $ref: '#/components/schemas/ProductReadDTO'
