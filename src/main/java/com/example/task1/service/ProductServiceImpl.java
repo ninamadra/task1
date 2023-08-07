@@ -3,23 +3,21 @@ package com.example.task1.service;
 import com.example.task1.mapper.ProductMapper;
 import com.example.task1.model.Product;
 import com.example.task1.repository.ProductRepository;
-import org.openapitools.model.ProductDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openapitools.model.ProductReadDTO;
+import org.openapitools.model.ProductWriteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper) {
@@ -28,61 +26,48 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO createProduct(String name, LocalDate expirationDate, ProductDTO.ProductTypeDTOEnum productTypeDTO) {
-        Product created = Product.builder()
-                .name(name)
-                .expirationDate(expirationDate)
-                .productType((productMapper.toProductType(productTypeDTO)))
-                .build();
-        logger.info(created.getId() + " " + created.getName() + " " +  created.getExpirationDate() + " " + created.getProductType());
-        Product savedProduct = productRepository.save(created);
-
-        return productMapper.toDTO(savedProduct);
-
+    public ResponseEntity<ProductReadDTO> createProduct(ProductWriteDTO productWriteDTO) {
+        Product product = productMapper.toEntity(productWriteDTO);
+        productRepository.save(product);
+        return ResponseEntity.created(URI.create("/" + product.getId())).body(productMapper.toReadDTO(product));
     }
 
     @Override
-    public Optional<ProductDTO> getProductById(Long id) {
-        Optional<Product> productOptional = productRepository.findById(id);
-        return productOptional.map(productMapper::toDTO);
-    }
-
-    @Override
-    public List<ProductDTO> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(productMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean updateProduct(Long id, String name, LocalDate expirationDate, ProductDTO.ProductTypeDTOEnum productTypeDTO) {
-
+    public ResponseEntity<ProductReadDTO> getProductById(Long id) {
         Optional<Product> productOptional = productRepository.findById(id);
 
-        if(productOptional.isPresent()){
-            Product toUpdate = productOptional.get();
-            if(name != null) {
-                toUpdate.setName(name);
-            }
-            if(expirationDate != null) {
-                toUpdate.setExpirationDate(expirationDate);
-            }
-            if( productTypeDTO != null) {
-                toUpdate.setProductType(productMapper.toProductType(productTypeDTO));
-            }
+        return productOptional.map(product -> ResponseEntity.ok(productMapper.toReadDTO(product)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
-            productRepository.save(toUpdate);
-            return true;
+    @Override
+    public ResponseEntity<List<ProductReadDTO>> getAllProducts() {
+        List<ProductReadDTO> products =  productRepository.findAll().stream()
+                .map(productMapper::toReadDTO)
+                .toList();
+        return ResponseEntity.ok(products);
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteProductById(Long id) {
+        if (productRepository.existsById(id)) {
+            productRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
         }
-        return false;
+
+        return ResponseEntity.notFound().build();
     }
 
     @Override
-    public boolean deleteProduct(Long id) {
+    public ResponseEntity<ProductReadDTO> updateProduct(Long id, ProductWriteDTO productWriteDTO) {
         Optional<Product> productOptional = productRepository.findById(id);
-        boolean isFound = productOptional.isPresent();
-        productOptional.ifPresent(productRepository::delete);
-        return isFound;
-
+        if (productOptional.isPresent()) {
+            Product productToUpdate = productMapper.toEntity(productWriteDTO);
+            productToUpdate.setId(id);
+            Product updatedProduct = productRepository.save(productToUpdate);
+            return ResponseEntity.ok(productMapper.toReadDTO(updatedProduct));
+        }
+        return ResponseEntity.notFound().build();
     }
+
 }
